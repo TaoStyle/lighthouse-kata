@@ -1,22 +1,9 @@
-/*
-Expected Output:
-thisIsAString <- camel
-ThisIsAString <- pascal
-this_is_a_string <- snake
-this-is-a-string <- kebab
-This Is A String <- title
-thIs Is A strIng <- vowel
-THiS iS a STRiNG <- consonant
-THIS_IS_A_STRING <- upper, snake
-*/
-
 const makeCase = function(input, casing) {
   let casedString = input;
-  const voyels = ['a','e','i','o','u'];
   const precedenceList = {
-    1 : ['camel', 'pascal', 'snake', 'kebab', 'title'],
-    2 : ['vowel', 'consonant'],
-    3 : ['upper', 'lower']
+    1 : ["camel", "pascal", "snake", "kebab", "title"],
+    2 : ["vowel", "consonant"],
+    3 : ["upper", "lower"]
   };
 
   let orderedCasing = orderCasingByPrecedence(casing);
@@ -24,105 +11,94 @@ const makeCase = function(input, casing) {
   // Case Sorting, could be turned into an indexed array of functions?
   for(let currentCasing of orderedCasing) {
     switch(currentCasing) {
-    case 'camel':
-      casedString = toCamelCasing(casedString);
+    case "camel":
+      // this is a string -> thisIsAString
+      casedString = caseFirstCharOfWord(casedString);
+      casedString = caseFirstCharOfString(casedString,"toLower");
+      casedString = replaceSpace(casedString,"");
       break;
-    case 'pascal':
-      casedString = toPascalCasing(casedString);
+    case "consonant":
+      // this is a string -> THiS iS a STRiNG
+      casedString = casedString.toUpperCase();
+      casedString = vowelCasing(casedString,"toLower");
       break;
-    case 'snake':
-      casedString = toSnakeCasing(casedString);
+    case "kebab":
+      // this is a string -> this-is-a-string
+      casedString = replaceSpace(casedString,"-");
       break;
-    case 'kebab':
-      casedString = toKebabCasing(casedString);
+    case "lower":
+      // this is a string -> this is a string
+      casedString = casedString.toLowerCase();
       break;
-    case 'title':
-      casedString = toTitleCasing(casedString);
+    case "pascal":
+      // this is a string -> ThisIsAString
+      casedString = caseFirstCharOfWord(casedString);
+      casedString = replaceSpace(casedString,"");
       break;
-    case 'vowel':
-      casedString = toVowelCasing(casedString);
+    case "snake":
+      // this is a string -> this_is_a_string
+      casedString = replaceSpace(casedString,"_");
       break;
-    case 'consonant':
-      casedString = toConsonantCasing(casedString);
+    case "title":
+      // this is a string -> This Is A String
+      casedString = caseFirstCharOfWord(casedString);
       break;
-    case 'upper':
-      casedString = toUpperCasing(casedString);
+    case "upper":
+      // this is a string -> THIS IS A STRING
+      casedString = casedString.toUpperCase();
       break;
-    case 'lower':
-      casedString = toLowerCasing(casedString);
+    case "vowel":
+      // this is a string -> thIs Is A strIng
+      casedString = vowelCasing(casedString,"toUpper");
       break;
     }
   }
-
-  /*
-  * Casing Functions
-  * COULD review string variables name
-  */
-  function toCamelCasing(string) {
-    let tempString = upperCaseFirstLetter(string);
-    let casedString = '';
-    casedString += tempString.slice(0, 1).toLowerCase();
-    casedString += tempString.slice(1);
-    return replaceSpace(casedString,'');
-  }
-
-  function toPascalCasing(string) {
-    let casedString = upperCaseFirstLetter(string);
-    return replaceSpace(casedString,'');
-  }
-
-  function toSnakeCasing(string) {
-    return replaceSpace(string,'_');
-  }
-
-  function toKebabCasing(string) {
-    return replaceSpace(string,'-');
-  }
-
-  function toTitleCasing(string) {
-    return upperCaseFirstLetter(string);
-  }
-
-  function toVowelCasing(string) {
-    let casedString = '';
-    for (let letter of string) {
-      casedString += (voyels.includes(letter) ? letter.toUpperCase() : letter.toLowerCase());
-    }
-    return casedString;
-  }
-
-  function toConsonantCasing(string) {
-    let casedString = '';
-    for (let letter of string) {
-      casedString += (voyels.includes(letter) ? letter.toLowerCase() : letter.toUpperCase());
-    }
-    return casedString;
-  }
-
-  function toUpperCasing(string) {
-    return string.toUpperCase();
-  }
-
-  function toLowerCasing(string) {
-    return string.toLowerCase();
-  }
-
 
   /*
   * Support functions
   */
-  function replaceSpace(string,character) {
-    return string.split(' ').join(character);
+
+  function vowelCasing(string, casing = "toUpper") {
+    const voyels = ["a","e","i","o","u",
+                    "A","E","I","O","U"];
+    let casedString = "";
+    for (let letter of string) {
+      casedString += ( !voyels.includes(letter)
+        ? letter
+        : casing === "toUpper"
+          ? letter.toUpperCase()
+          : letter.toLowerCase()
+      );
+    }
+    return casedString;
   }
 
-  function upperCaseFirstLetter(string) {
-    let asArray = string.split(' ');
-    let returnString = '';
+  function replaceSpace(string,char) {
+    return string.split(" ").join(char);
+  }
+
+  function caseFirstCharOfWord(string,casing = "toUpper") {
+    let asArray = string.split(" ");
+    let returnString = "";
     for (let each of asArray) {
-      returnString += each.slice(0, 1).toUpperCase();
+      returnString += (casing === "toUpper"
+        ? each.slice(0, 1).toUpperCase()
+        : each.slice(0, 1).toLowerCase()
+      );
       returnString += each.slice(1);
-      returnString += ' ';
+      returnString += " ";
     }
+    return returnString;
+  }
+
+  function caseFirstCharOfString(string,casing = "toUpper") {
+    let tempString = string;
+    let returnString = "";
+    returnString += (casing === "toUpper"
+      ? tempString.slice(0, 1).toUpperCase()
+      : tempString.slice(0, 1).toLowerCase()
+    );
+    returnString += tempString.slice(1);
     return returnString;
   }
 
@@ -148,7 +124,6 @@ const makeCase = function(input, casing) {
     }
     return newOrder;
   }
-
 
   console.log(casedString);
 };
